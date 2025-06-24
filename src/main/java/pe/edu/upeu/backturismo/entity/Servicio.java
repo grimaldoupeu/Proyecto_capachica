@@ -25,7 +25,7 @@ public class Servicio {
     private String descripcion;
 
     @Column(length = 100)
-    private String icono;
+    private String iconoUrlOrCode;
 
     @Enumerated(EnumType.STRING)
     @Column(length = 50)

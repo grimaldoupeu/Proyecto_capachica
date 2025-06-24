@@ -29,24 +29,32 @@ public class UsuarioController {
     private JwtUtil jwtUtil;
 
     // REGISTRO
+    // REGISTRO - Versión actualizada para manejar apellidos
     @PostMapping("/register")
-    public ResponseEntity<?> registerUsuario(@RequestBody Usuario usuario) {
+    public ResponseEntity<?> registerUsuario(@RequestBody Map<String, String> userData) {
         try {
-            if (usuarioService.existsByEmail(usuario.getEmail())) {
+            String nombre = userData.get("nombre");
+            String apellidos = userData.get("apellidos"); // Nuevo campo
+            String email = userData.get("email");
+            String password = userData.get("password");
+            String rol = userData.get("rol");
+
+            if (usuarioService.existsByEmail(email)) {
                 return ResponseEntity.badRequest()
                         .body(Map.of("error", "El email ya está registrado"));
             }
 
-            if (usuario.getPassword() == null || usuario.getPassword().isEmpty()) {
+            if (password == null || password.isEmpty()) {
                 return ResponseEntity.badRequest()
                         .body(Map.of("error", "La contraseña no puede ser nula o vacía"));
             }
 
-            usuario.setPassword(passwordEncoder.encode(usuario.getPassword()));
-
-            if (usuario.getRol() == null || usuario.getRol().isEmpty()) {
-                usuario.setRol("USER");
-            }
+            Usuario usuario = new Usuario();
+            usuario.setNombre(nombre);
+            usuario.setApellido(apellidos); // Si tienes este campo en tu entidad
+            usuario.setEmail(email);
+            usuario.setPassword(passwordEncoder.encode(password));
+            usuario.setRol(rol != null && !rol.isEmpty() ? rol : "USER");
 
             Usuario savedUsuario = usuarioService.save(usuario);
             savedUsuario.setPassword(null); // ocultar contraseña en la respuesta

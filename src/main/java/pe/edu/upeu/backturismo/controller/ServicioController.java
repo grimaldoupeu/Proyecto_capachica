@@ -5,30 +5,67 @@ import pe.edu.upeu.backturismo.service.ServicioService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import java.util.List;
-import java.util.Optional;
 
+import java.util.*;
+
+@CrossOrigin(origins = "*") // Permite peticiones desde cualquier origen
 @RestController
 @RequestMapping("/api/servicios")
 public class ServicioController {
+
     @Autowired
     private ServicioService servicioService;
 
     @GetMapping
-    public List<Servicio> getAllServicios() { return servicioService.findAll(); }
+    public List<Servicio> getAllServicios() {
+        return servicioService.findAll();
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<Servicio> getServicioById(@PathVariable Long id) {
         Optional<Servicio> servicio = servicioService.findById(id);
         return servicio.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
+
     @PostMapping
-    public Servicio createServicio(@RequestBody Servicio servicio) { return servicioService.save(servicio); }
+    public ResponseEntity<?> createServicio(@RequestBody Servicio servicio) {
+        try {
+            if (servicio.getNombre() == null || servicio.getNombre().isEmpty()) {
+                return ResponseEntity.badRequest().body(Map.of("error", "El nombre es obligatorio"));
+            }
+            Servicio nuevo = servicioService.save(servicio);
+            return ResponseEntity.ok(Map.of(
+                    "message", "Servicio creado exitosamente",
+                    "servicio", nuevo
+            ));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("error", "Error al crear servicio: " + e.getMessage()));
+        }
+    }
+
     @PutMapping("/{id}")
-    public ResponseEntity<Servicio> updateServicio(@PathVariable Long id, @RequestBody Servicio servicioDetails) {
-        Optional<Servicio> servicio = servicioService.findById(id);
-        if (servicio.isPresent()) return ResponseEntity.ok(servicioService.save(servicio.get()));
+    public ResponseEntity<?> updateServicio(@PathVariable Long id, @RequestBody Servicio servicioDetails) {
+        Optional<Servicio> optional = servicioService.findById(id);
+        if (optional.isPresent()) {
+            Servicio servicio = optional.get();
+            if (servicioDetails.getNombre() != null) {
+                servicio.setNombre(servicioDetails.getNombre());
+            }
+            if (servicioDetails.getDescripcion() != null) {
+                servicio.setDescripcion(servicioDetails.getDescripcion());
+            }
+            if (servicioDetails.getIconoUrlOrCode() != null) {
+                servicio.setIconoUrlOrCode(servicioDetails.getIconoUrlOrCode());
+            }
+            Servicio actualizado = servicioService.save(servicio);
+            return ResponseEntity.ok(Map.of(
+                    "message", "Servicio actualizado",
+                    "servicio", actualizado
+            ));
+        }
         return ResponseEntity.notFound().build();
     }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteServicio(@PathVariable Long id) {
         if (servicioService.findById(id).isPresent()) {
