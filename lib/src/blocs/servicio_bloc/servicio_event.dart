@@ -1,4 +1,4 @@
-part of 'servicio_bloc.dart';
+import 'package:equatable/equatable.dart';
 
 abstract class ServicioEvent extends Equatable {
   const ServicioEvent();

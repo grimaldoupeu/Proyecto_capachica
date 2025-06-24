@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-// import 'package:flutter_bloc/flutter_bloc.dart'; // Would be used for BLoC
-// import '../../blocs/auth_bloc/auth_bloc.dart'; // Import AuthBloc and events
-// import '../../models/usuario/user_model.dart'; // Import UserRole
+
+import '../../services/auth_service/auth_service.dart';
+import '../../models/usuario/user_model.dart'; // Importado para usar UserRole
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -14,10 +14,13 @@ class _RegisterScreenState extends State<RegisterScreen>
     with TickerProviderStateMixin {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
+  final _lastnameController = TextEditingController(); // Apellido
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _obscurePassword = true;
   bool _isLoading = false;
+
+  final AuthService _authService = AuthService();
 
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
@@ -53,6 +56,7 @@ class _RegisterScreenState extends State<RegisterScreen>
   @override
   void dispose() {
     _nameController.dispose();
+    _lastnameController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
     _animationController.dispose();
@@ -65,40 +69,41 @@ class _RegisterScreenState extends State<RegisterScreen>
         _isLoading = true;
       });
 
-      // Simulate loading
-      await Future.delayed(const Duration(seconds: 2));
+      try {
+        await _authService.register(
+          _nameController.text,
+          _lastnameController.text,
+          _emailController.text,
+          _passwordController.text,
+          UserRole.turista,
+        );
 
-      setState(() {
-        _isLoading = false;
-      });
-
-      // In a real app with BLoC:
-      // BlocProvider.of<AuthBloc>(context).add(
-      //   RegisterRequested(
-      //     nombre: _nameController.text,
-      //     email: _emailController.text,
-      //     password: _passwordController.text,
-      //     // rol: _selectedRole, // Pass the selected role
-      //   ),
-      // );
-      print('Register attempt: Name: ${_nameController.text}, Email: ${_emailController.text}');
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Row(
-            children: [
-              const Icon(Icons.check_circle, color: Colors.white),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Text('¡Registro exitoso para ${_emailController.text}!'),
-              ),
-            ],
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Row(
+              children: [
+                Icon(Icons.check_circle, color: Colors.white),
+                SizedBox(width: 12),
+                Text('¡Registro exitoso! Inicia sesión ahora.'),
+              ],
+            ),
+            backgroundColor: Colors.green,
           ),
-          backgroundColor: Colors.green,
-          behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-        ),
-      );
+        );
+
+        Navigator.pushReplacementNamed(context, '/login');
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error en el registro: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      } finally {
+        setState(() {
+          _isLoading = false;
+        });
+      }
     }
   }
 
@@ -127,19 +132,12 @@ class _RegisterScreenState extends State<RegisterScreen>
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    // Header Section
                     const SizedBox(height: 40),
                     _buildHeader(),
                     const SizedBox(height: 40),
-
-                    // Form Card
                     _buildFormCard(),
-
                     const SizedBox(height: 24),
-
-                    // Login Link
                     _buildLoginLink(),
-
                     const SizedBox(height: 40),
                   ],
                 ),
@@ -216,6 +214,8 @@ class _RegisterScreenState extends State<RegisterScreen>
             children: [
               _buildNameField(),
               const SizedBox(height: 20),
+              _buildLastNameField(),
+              const SizedBox(height: 20),
               _buildEmailField(),
               const SizedBox(height: 20),
               _buildPasswordField(),
@@ -232,7 +232,7 @@ class _RegisterScreenState extends State<RegisterScreen>
     return TextFormField(
       controller: _nameController,
       decoration: InputDecoration(
-        labelText: 'Nombre Completo',
+        labelText: 'Nombre',
         prefixIcon: Icon(Icons.person_outline, color: Colors.grey.shade600),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
@@ -251,7 +251,37 @@ class _RegisterScreenState extends State<RegisterScreen>
       ),
       validator: (value) {
         if (value == null || value.isEmpty) {
-          return 'Por favor ingresa tu nombre completo';
+          return 'Por favor ingresa tu nombre';
+        }
+        return null;
+      },
+    );
+  }
+
+  Widget _buildLastNameField() {
+    return TextFormField(
+      controller: _lastnameController,
+      decoration: InputDecoration(
+        labelText: 'Apellidos',
+        prefixIcon: Icon(Icons.person_outline, color: Colors.grey.shade600),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: Colors.grey.shade300),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: Colors.grey.shade300),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: Colors.blue.shade400, width: 2),
+        ),
+        filled: true,
+        fillColor: Colors.grey.shade50,
+      ),
+      validator: (value) {
+        if (value == null || value.isEmpty) {
+          return 'Por favor ingresa tus apellidos';
         }
         return null;
       },
@@ -347,7 +377,7 @@ class _RegisterScreenState extends State<RegisterScreen>
           shadowColor: Colors.blue.withOpacity(0.3),
         ),
         child: _isLoading
-            ? Row(
+            ? const Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   SizedBox(
@@ -358,16 +388,16 @@ class _RegisterScreenState extends State<RegisterScreen>
                       valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                     ),
                   ),
-                  const SizedBox(width: 12),
-                  const Text('Registrando...'),
+                  SizedBox(width: 12),
+                  Text('Registrando...'),
                 ],
               )
-            : Row(
+            : const Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Icon(Icons.person_add_rounded),
-                  const SizedBox(width: 8),
-                  const Text(
+                  Icon(Icons.person_add_rounded),
+                  SizedBox(width: 8),
+                  Text(
                     'Crear Cuenta',
                     style: TextStyle(
                       fontSize: 16,
@@ -401,23 +431,7 @@ class _RegisterScreenState extends State<RegisterScreen>
           const SizedBox(width: 8),
           GestureDetector(
             onTap: () {
-              // In a real app, navigate to LoginScreen
-              // Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (_) => const LoginScreen()));
-              print('Navigate to Login Screen (Placeholder)');
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Row(
-                    children: [
-                      const Icon(Icons.info_outline, color: Colors.white),
-                      const SizedBox(width: 12),
-                      const Text('Navegar a Login (Placeholder)'),
-                    ],
-                  ),
-                  backgroundColor: Colors.blue.shade600,
-                  behavior: SnackBarBehavior.floating,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                ),
-              );
+              Navigator.pushReplacementNamed(context, '/login');
             },
             child: Text(
               'Iniciar Sesión',

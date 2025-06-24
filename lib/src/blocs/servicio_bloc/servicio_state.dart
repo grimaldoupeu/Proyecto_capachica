@@ -1,4 +1,7 @@
-part of 'servicio_bloc.dart';
+import 'package:equatable/equatable.dart';
+
+import '../../models/servicio/servicio_model.dart';
+
 
 abstract class ServicioState extends Equatable {
   const ServicioState();

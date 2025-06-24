@@ -12,15 +12,17 @@ class HomeScreen extends StatelessWidget {
     // Reemplaza esta sección en tu HomeScreen
     final alojamientos = [
       {
-        'id': '1',
-        'nombre': 'Cabaña del Sol',
-        // URLs reales de Unsplash que funcionan
-        'urlFoto': 'https://images.unsplash.com/photo-1449824913935-59a10b8d2000?w=300&h=180&fit=crop&crop=center',
-        'precioPorNoche': 150.0,
-        'ciudad': 'Capachica',
-        'calificacionPromedio': 4.7,
-        'numeroDeResenas': 32,
-      },
+         'id': '1',
+         'nombre': 'Cabaña del Sol',
+         'urlFoto': 'https://images.unsplash.com/photo-1449824913935-59a10b8d2000?w=300&h=180&fit=crop&crop=center',
+         'precioPorNoche': 150.0,
+         'ciudad': 'Capachica',
+         'calificacionPromedio': 4.7,
+         'numeroDeResenas': 32,
+         'urlReserva': '/reserva/1', // Ruta interna de tu app
+         // O si usas URLs externas:
+         // 'urlReserva': 'https://tuapp.com/reserva/1',
+       },
       {
         'id': '2',
         'nombre': 'Casa del Lago',
@@ -441,55 +443,49 @@ class HomeScreen extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
+        padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(12),
           boxShadow: [
             BoxShadow(
-              color: Colors.grey.withOpacity(0.1),
-              spreadRadius: 0,
-              blurRadius: 10,
-              offset: const Offset(0, 2),
+              color: Colors.grey.withOpacity(0.2),
+              spreadRadius: 1,
+              blurRadius: 5,
+              offset: const Offset(0, 3),
             ),
           ],
         ),
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: color.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Icon(
-                  icon,
-                  color: color,
-                  size: 28,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Text(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min, // Asegura que no crezca demasiado
+          children: [
+            CircleAvatar(
+              backgroundColor: color.withOpacity(0.1),
+              child: Icon(icon, color: color),
+            ),
+            const SizedBox(height: 8),
+            FittedBox( // Soluciona el desborde del título
+              child: Text(
                 title,
                 style: const TextStyle(
-                  fontSize: 14,
                   fontWeight: FontWeight.bold,
-                  color: Color(0xFF333333),
+                  fontSize: 16,
                 ),
-                textAlign: TextAlign.center,
               ),
-              Text(
+            ),
+            const SizedBox(height: 4),
+            Flexible( // Soluciona el desborde del subtítulo
+              child: Text(
                 subtitle,
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 12,
-                  color: Colors.grey[600],
+                  color: Colors.grey,
                 ),
-                textAlign: TextAlign.center,
+                overflow: TextOverflow.ellipsis,
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

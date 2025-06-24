@@ -3,8 +3,8 @@ import 'package:equatable/equatable.dart';
 import '../../models/servicio/servicio_model.dart';
 import '../../services/servicio_service/servicio_service.dart'; // Placeholder
 
-part 'servicio_event.dart';
-part 'servicio_state.dart';
+import 'servicio_event.dart';
+import 'servicio_state.dart';
 
 class ServicioBloc extends Bloc<ServicioEvent, ServicioState> {
   final ServicioService _servicioService;

@@ -10,18 +10,17 @@ class AlojamientoCard extends StatelessWidget {
     final textTheme = Theme.of(context).textTheme;
 
     return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 0, vertical: 8.0), // Removido margin horizontal
+      margin: const EdgeInsets.symmetric(horizontal: 0, vertical: 8.0),
       elevation: 8,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: InkWell(
         borderRadius: BorderRadius.circular(16),
         onTap: () {
-          print('Tapped on card: ${alojamientoData['nombre']} (ID: ${alojamientoData['id']})');
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Navegando a detalles de ${alojamientoData['nombre']}'),
-              backgroundColor: const Color(0xFF1976D2),
-            ),
+          // Navegar a los detalles del alojamiento
+          Navigator.pushNamed(
+            context,
+            '/alojamientos/detail',
+            arguments: alojamientoData['id'],
           );
         },
         child: Column(
@@ -109,6 +108,53 @@ class AlojamientoCard extends StatelessWidget {
                             ),
                           ),
                         ],
+                      ),
+                    ),
+                  ),
+                  // Botón de reserva rápida
+                  Positioned(
+                    bottom: 12,
+                    right: 12,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF1976D2),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Material(
+                        color: Colors.transparent,
+                        child: InkWell(
+                          borderRadius: BorderRadius.circular(20),
+                          onTap: () {
+                            // Navegación directa a crear reserva
+                            Navigator.pushNamed(
+                              context,
+                              '/reservas/create',
+                              arguments: alojamientoData,
+                            );
+                          },
+                          child: const Padding(
+                            padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  Icons.book_online,
+                                  color: Colors.white,
+                                  size: 16,
+                                ),
+                                SizedBox(width: 4),
+                                Text(
+                                  'Reservar',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
                       ),
                     ),
                   ),

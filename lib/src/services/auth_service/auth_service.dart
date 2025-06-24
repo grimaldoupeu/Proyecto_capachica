@@ -1,75 +1,98 @@
-// Placeholder for AuthService
-// This service would handle actual API calls and secure token storage.
-
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 import '../../models/usuario/user_model.dart';
-// import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class AuthService {
-  // final _storage = const FlutterSecureStorage(); // Would be used in a real scenario
-
-  AuthService();
+  final String baseUrl = 'http://10.0.2.2:8080/api/usuarios';
+  // Para dispositivo físico usa: 'http://192.168.0.110:8080/api/usuarios';
 
   Future<User> login(String email, String password) async {
-    // Simulate API call
-    await Future.delayed(const Duration(seconds: 1));
-    if (email == 'test@example.com' && password == 'password') {
-      return User(id: '1', nombre: 'Test User', email: email, rol: UserRole.turista);
-    } else if (email == 'admin@example.com' && password == 'adminpass') {
-      return User(id: '0', nombre: 'Admin User', email: email, rol: UserRole.administrador);
+    try {
+      print('Intentando login con URL: $baseUrl/login');
+
+      final response = await http.post(
+        Uri.parse('$baseUrl/login'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'email': email, 'password': password}),
+      );
+
+      print('Login - Status Code: ${response.statusCode}');
+      print('Login - Response Body: ${response.body}');
+
+      if (response.statusCode == 200) {
+        final body = jsonDecode(response.body);
+        final userJson = body['usuario'];
+
+        return User(
+          id: userJson['id'].toString(),
+          nombre: userJson['nombre'] ?? 'Usuario',
+          email: userJson['email'],
+          rol: userJson['rol'] == 'ADMIN' ? UserRole.administrador : UserRole.turista,
+        );
+      } else {
+        final errorBody = jsonDecode(response.body);
+        throw Exception(errorBody['error'] ?? 'Error al iniciar sesión');
+      }
+    } catch (e) {
+      print('Error en login: $e');
+      rethrow;
     }
-    throw Exception('Invalid credentials');
   }
 
-  Future<User> register(String nombre, String email, String password, UserRole rol) async {
-    // Simulate API call
-    await Future.delayed(const Duration(seconds: 1));
-    // In a real app, this would return the created user from the backend
-    return User(id: DateTime.now().millisecondsSinceEpoch.toString(), nombre: nombre, email: email, rol: rol);
-  }
+  Future<User> register(String nombre, String apellido, String email, String password, UserRole rol) async {
+    try {
+      final url = Uri.parse('$baseUrl/register');
 
-  Future<void> logout() async {
-    // Simulate server-side logout or cleanup
-    await Future.delayed(const Duration(milliseconds: 500));
-    // await deleteToken(); // Clear token on logout
-  }
+      // Mapear el rol correctamente según tu backend
+      String rolBackend;
+      switch (rol) {
+        case UserRole.administrador:
+          rolBackend = 'ADMIN';
+          break;
+        case UserRole.turista:
+          rolBackend = 'USER';
+          break;
+      }
 
-  Future<void> saveToken(String token) async {
-    // await _storage.write(key: 'auth_token', value: token);
-    print('AuthService (Placeholder): Token $token saved.');
-    await Future.delayed(const Duration(milliseconds: 100));
-  }
+      // IMPORTANTE: Usar "apellido" (singular) para que coincida con el setter
+      final requestBody = {
+        'nombre': nombre,
+        'apellido': apellido,  // Cambiado de "apellidos" a "apellido"
+        'email': email,
+        'password': password,
+        'rol': rolBackend,
+      };
 
-  Future<String?> getToken() async {
-    // return await _storage.read(key: 'auth_token');
-    print('AuthService (Placeholder): getToken called.');
-    await Future.delayed(const Duration(milliseconds: 100));
-    return null; // Simulate no token initially for AuthAppStarted
-  }
+      print('Intentando registro con URL: $url');
+      print('Datos a enviar: ${jsonEncode(requestBody)}');
 
-  Future<void> deleteToken() async {
-    // await _storage.delete(key: 'auth_token');
-    print('AuthService (Placeholder): Token deleted.');
-    await Future.delayed(const Duration(milliseconds: 100));
-  }
+      final response = await http.post(
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode(requestBody),
+      );
 
-  Future<bool> hasToken() async {
-    // final token = await getToken();
-    // return token != null && token.isNotEmpty;
-    print('AuthService (Placeholder): hasToken called.');
-    await Future.delayed(const Duration(milliseconds: 100));
-    return false; // Simulate no token initially
-  }
+      print('Register - Status Code: ${response.statusCode}');
+      print('Register - Response Body: ${response.body}');
 
-  Future<User> getCurrentUser() async {
-    // This would typically involve fetching user data based on a stored token
-    // or returning a cached user object.
-    await Future.delayed(const Duration(seconds: 1));
-    // For now, return a mock user or throw if no token implies no user
-    // This part is highly dependent on how token validation and user fetching is designed
-    // For this placeholder, let's assume if we reach here, we expect a user.
-    // This might be called after a successful token check.
-    print('AuthService (Placeholder): getCurrentUser called.');
-    // This is a very basic mock. In reality, you\'d decode a token or fetch from API.
-    return const User(id: 'mock_current_user', nombre: 'Current Mock User', email: 'current@example.com', rol: UserRole.turista);
+      final data = jsonDecode(response.body);
+
+      if (response.statusCode == 200) {
+        final usuario = data['usuario'];
+        return User(
+          id: usuario['id'].toString(),
+          nombre: usuario['nombre'] ?? 'Usuario',
+          email: usuario['email'],
+          rol: usuario['rol'] == 'ADMIN' ? UserRole.administrador : UserRole.turista,
+        );
+      } else {
+        // El backend devuelve errores con la clave 'error'
+        String errorMessage = data['error'] ?? 'Error al registrar usuario';
+        throw Exception(errorMessage);
+      }
+    } catch (e) {
+      print('Error en register: $e');
+      rethrow;
+    }
   }
 }

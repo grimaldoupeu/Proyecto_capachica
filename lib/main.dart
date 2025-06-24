@@ -42,6 +42,9 @@ class MyApp extends StatelessWidget {
           return CreateReservaScreen(alojamientoData: args ?? {'id': '1', 'nombre': 'Default', 'precioPorNoche': 100.0});
         },
         '/reservas/user': (context) => const UserReservasScreen(),
+        '/admin-dashboard': (context) => const AdminDashboardScreen(),
+        '/manage-alojamientos': (context) => const ManageAlojamientosScreen(),
+        '/manage-servicios': (context) => const ManageServiciosScreen(),
       },
     );
   }
