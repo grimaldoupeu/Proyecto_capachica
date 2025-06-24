@@ -57,11 +57,12 @@ class AuthService {
       // IMPORTANTE: Usar "apellido" (singular) para que coincida con el setter
       final requestBody = {
         'nombre': nombre,
-        'apellido': apellido,  // Cambiado de "apellidos" a "apellido"
+        'apellidos': apellido,  // ✅ Campo corregido
         'email': email,
         'password': password,
         'rol': rolBackend,
       };
+
 
       print('Intentando registro con URL: $url');
       print('Datos a enviar: ${jsonEncode(requestBody)}');
