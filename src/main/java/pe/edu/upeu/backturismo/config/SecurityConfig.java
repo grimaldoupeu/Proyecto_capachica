@@ -36,6 +36,9 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/emprendedores/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/alojamientos/**").permitAll()
 
+                        // 🟢 NUEVO: servicios totalmente públicos
+                        .requestMatchers("/api/servicios/**").permitAll()
+
                         // 🟡 USER o ADMIN: CRUD sobre sus alojamientos
                         .requestMatchers(HttpMethod.POST, "/api/alojamientos").hasAnyRole("USER", "ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/api/alojamientos/**").hasAnyRole("USER", "ADMIN")
@@ -46,11 +49,9 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.PUT, "/api/emprendedores/**").hasAnyRole("USER", "ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/api/emprendedores/**").hasAnyRole("USER", "ADMIN")
 
-                        // 🔴 SOLO ADMIN: ver y eliminar usuarios
+                        // 🔴 SOLO ADMIN
                         .requestMatchers(HttpMethod.GET, "/api/usuarios/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/api/usuarios/**").hasRole("ADMIN")
-
-                        // 🔴 SOLO ADMIN: ver todas las reservas (si existe endpoint /todas)
                         .requestMatchers(HttpMethod.GET, "/api/reservas/todas").hasRole("ADMIN")
 
                         // 🟡 USER o ADMIN: hacer/ver sus reservas

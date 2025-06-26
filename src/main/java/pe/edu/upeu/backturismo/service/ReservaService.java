@@ -9,4 +9,6 @@ public interface ReservaService {
     Optional<Reserva> findById(Long id);
     Reserva save(Reserva reserva);
     void deleteById(Long id);
+    List<Reserva> findByUsuarioId(Long userId);
+
 }

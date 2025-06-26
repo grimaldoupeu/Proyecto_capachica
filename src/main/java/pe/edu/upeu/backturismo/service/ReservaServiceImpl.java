@@ -13,11 +13,27 @@ public class ReservaServiceImpl implements ReservaService {
     private ReservaRepository reservaRepository;
 
     @Override
-    public List<Reserva> findAll() { return reservaRepository.findAll(); }
+    public List<Reserva> findAll() {
+        return reservaRepository.findAll();
+    }
+
     @Override
-    public Optional<Reserva> findById(Long id) { return reservaRepository.findById(id); }
+    public Optional<Reserva> findById(Long id) {
+        return reservaRepository.findById(id);
+    }
+
     @Override
-    public Reserva save(Reserva reserva) { return reservaRepository.save(reserva); }
+    public Reserva save(Reserva reserva) {
+        return reservaRepository.save(reserva);
+    }
+
     @Override
-    public void deleteById(Long id) { reservaRepository.deleteById(id); }
+    public void deleteById(Long id) {
+        reservaRepository.deleteById(id);
+    }
+
+    @Override
+    public List<Reserva> findByUsuarioId(Long userId) {
+        return reservaRepository.findByUsuarioId(userId);
+    }
 }

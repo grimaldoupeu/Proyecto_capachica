@@ -73,8 +73,6 @@ public class Alojamiento {
     @Column(name = "num_camas", nullable = false)
     private Integer numCamas = 1;
 
-    @Column(name = "num_banos", nullable = false, precision = 3, scale = 1)
-    private BigDecimal numBanos = BigDecimal.ONE;
 
     // Precios
     @Column(name = "precio_noche", nullable = false, precision = 10, scale = 2)

@@ -9,4 +9,7 @@ public interface ServicioService {
     Optional<Servicio> findById(Long id);
     Servicio save(Servicio servicio);
     void deleteById(Long id);
+    List<Servicio> findByUsuarioId(Long userId);
+
+
 }

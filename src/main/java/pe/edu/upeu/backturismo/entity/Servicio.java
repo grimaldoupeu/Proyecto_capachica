@@ -25,7 +25,8 @@ public class Servicio {
     private String descripcion;
 
     @Column(length = 100)
-    private String iconoUrlOrCode;
+    private String icono;
+
 
     @Enumerated(EnumType.STRING)
     @Column(length = 50)
@@ -33,6 +34,11 @@ public class Servicio {
 
     @Column(columnDefinition = "BOOLEAN DEFAULT TRUE")
     private Boolean activo = true;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "usuario_id")
+    private Usuario usuario;
+
 
     // Relaciones
     @OneToMany(mappedBy = "servicio", cascade = CascadeType.ALL, fetch = FetchType.LAZY)

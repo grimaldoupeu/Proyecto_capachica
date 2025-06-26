@@ -4,20 +4,38 @@ import pe.edu.upeu.backturismo.entity.Servicio;
 import pe.edu.upeu.backturismo.repository.ServicioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
 import java.util.List;
 import java.util.Optional;
 
 @Service
 public class ServicioServiceImpl implements ServicioService {
+
     @Autowired
     private ServicioRepository servicioRepository;
 
     @Override
-    public List<Servicio> findAll() { return servicioRepository.findAll(); }
+    public List<Servicio> findAll() {
+        return servicioRepository.findAll();
+    }
+
     @Override
-    public Optional<Servicio> findById(Long id) { return servicioRepository.findById(id); }
+    public Optional<Servicio> findById(Long id) {
+        return servicioRepository.findById(id);
+    }
+
     @Override
-    public Servicio save(Servicio servicio) { return servicioRepository.save(servicio); }
+    public Servicio save(Servicio servicio) {
+        return servicioRepository.save(servicio);
+    }
+
     @Override
-    public void deleteById(Long id) { servicioRepository.deleteById(id); }
+    public void deleteById(Long id) {
+        servicioRepository.deleteById(id);
+    }
+
+    @Override
+    public List<Servicio> findByUsuarioId(Long userId) {
+        return servicioRepository.findByUsuarioId(userId);
+    }
 }

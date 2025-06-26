@@ -37,4 +37,9 @@ public class ReservaController {
         }
         return ResponseEntity.notFound().build();
     }
+    @GetMapping("/usuario/{userId}")
+    public List<Reserva> getReservasByUsuario(@PathVariable Long userId) {
+        return reservaService.findByUsuarioId(userId);
+    }
+
 }

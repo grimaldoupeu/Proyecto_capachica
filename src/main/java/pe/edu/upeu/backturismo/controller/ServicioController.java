@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
 
-@CrossOrigin(origins = "*") // Permite peticiones desde cualquier origen
+@CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("/api/servicios")
 public class ServicioController {
@@ -25,6 +25,11 @@ public class ServicioController {
     public ResponseEntity<Servicio> getServicioById(@PathVariable Long id) {
         Optional<Servicio> servicio = servicioService.findById(id);
         return servicio.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
+    @GetMapping("/usuario/{userId}")
+    public List<Servicio> getServiciosByUsuario(@PathVariable Long userId) {
+        return servicioService.findByUsuarioId(userId);
     }
 
     @PostMapping
@@ -54,8 +59,8 @@ public class ServicioController {
             if (servicioDetails.getDescripcion() != null) {
                 servicio.setDescripcion(servicioDetails.getDescripcion());
             }
-            if (servicioDetails.getIconoUrlOrCode() != null) {
-                servicio.setIconoUrlOrCode(servicioDetails.getIconoUrlOrCode());
+            if (servicioDetails.getIcono() != null) {
+                servicio.setIcono(servicioDetails.getIcono());
             }
             Servicio actualizado = servicioService.save(servicio);
             return ResponseEntity.ok(Map.of(
