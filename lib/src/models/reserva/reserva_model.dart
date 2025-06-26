@@ -1,27 +1,25 @@
 import 'package:equatable/equatable.dart';
 
 enum EstadoReserva {
-  pendiente, // Waiting for confirmation or payment
-  confirmada, // Confirmed by host/system
+  pendiente,
+  confirmada,
   canceladaPorUsuario,
   canceladaPorAnfitrion,
-  completada, // Stay finished
-  noPresentado // User didn't show up
+  completada,
+  noPresentado,
 }
 
 class Reserva extends Equatable {
   final String id;
   final String alojamientoId;
-  final String usuarioId; // Turista ID
+  final String usuarioId;
   final DateTime fechaInicio;
   final DateTime fechaFin;
   final int numeroHuespedes;
   final double costoTotal;
   final EstadoReserva estado;
-  final DateTime fechaCreacion; // When the booking was made
-
-  // Optional fields
-  final String? notasEspeciales; // Special requests from user
+  final DateTime fechaCreacion;
+  final String? notasEspeciales;
 
   const Reserva({
     required this.id,
@@ -49,7 +47,4 @@ class Reserva extends Equatable {
         fechaCreacion,
         notasEspeciales,
       ];
-
-  // Helper to calculate duration of stay
-  int get duracionEnNoches => fechaFin.difference(fechaInicio).inDays;
 }

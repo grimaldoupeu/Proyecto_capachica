@@ -125,14 +125,14 @@ class _RegisterScreenState extends State<RegisterScreen>
   void _showSuccessSnackBar() {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Row(
+        content: const Row(
           children: [
-            const Icon(Icons.check_circle_outline, color: Colors.white),
-            const SizedBox(width: 12),
+            Icon(Icons.check_circle_outline, color: Colors.white),
+            SizedBox(width: 12),
             Expanded(
               child: Text(
-                '¡Registro exitoso! Ya puedes iniciar sesión',
-                style: const TextStyle(fontWeight: FontWeight.w500),
+                '¡Registro exitoso! Bienvenido a tu dashboard',
+                style: TextStyle(fontWeight: FontWeight.w500),
               ),
             ),
           ],
@@ -141,9 +141,24 @@ class _RegisterScreenState extends State<RegisterScreen>
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         margin: const EdgeInsets.all(16),
-        duration: const Duration(seconds: 3),
+        duration: const Duration(seconds: 2),
+        action: SnackBarAction(
+          label: 'Continuar',
+          textColor: Colors.white,
+          onPressed: () {
+            // Navegar inmediatamente al dashboard
+            Navigator.pushReplacementNamed(context, '/user_dashboard');
+          },
+        ),
       ),
     );
+
+    // Navegar automáticamente después de 2.5 segundos
+    Future.delayed(const Duration(milliseconds: 2500), () {
+      if (mounted) {
+        Navigator.pushReplacementNamed(context, '/user_dashboard');
+      }
+    });
   }
 
   void _showErrorSnackBar(String message) {
@@ -198,18 +213,15 @@ class _RegisterScreenState extends State<RegisterScreen>
                 ),
               ),
               Positioned(
-                bottom: -50,
-                left: -50,
-                child: Container(
-                  width: 150,
-                  height: 150,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: Colors.white.withOpacity(0.05),
-                  ),
+                top: 20,
+                left: 20,
+                child: IconButton(
+                  icon: const Icon(Icons.arrow_back_ios_new, color: Colors.white),
+                  onPressed: () {
+                    Navigator.of(context).pushNamedAndRemoveUntil('/home', (route) => false);
+                    },
                 ),
               ),
-              // Botón de regreso a home
               Positioned(
                 top: 20,
                 left: 20,
@@ -641,10 +653,10 @@ class _RegisterScreenState extends State<RegisterScreen>
           shadowColor: Colors.white.withOpacity(0.3),
         ),
         child: _isLoading
-            ? Row(
+            ? const Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const SizedBox(
+                  SizedBox(
                     width: 20,
                     height: 20,
                     child: CircularProgressIndicator(
@@ -652,8 +664,8 @@ class _RegisterScreenState extends State<RegisterScreen>
                       strokeWidth: 2,
                     ),
                   ),
-                  const SizedBox(width: 12),
-                  const Text('Registrando...'),
+                  SizedBox(width: 12),
+                  Text('Registrando...'),
                 ],
               )
             : const Row(

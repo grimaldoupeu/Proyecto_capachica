@@ -20,6 +20,32 @@ class Direccion extends Equatable {
     this.latitud,
     this.longitud,
   });
+  factory Direccion.fromJson(Map<String, dynamic> json) {
+    return Direccion(
+      id: json['id'],
+      calle: json['calle'],
+      numero: json['numero'],
+      ciudad: json['ciudad'],
+      region: json['region'],
+      pais: json['pais'],
+      latitud: (json['latitud'] as num?)?.toDouble(),
+      longitud: (json['longitud'] as num?)?.toDouble(),
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'calle': calle,
+      'numero': numero,
+      'ciudad': ciudad,
+      'region': region,
+      'pais': pais,
+      'latitud': latitud,
+      'longitud': longitud,
+    };
+  }
+
 
   @override
   List<Object?> get props => [id, calle, numero, ciudad, region, pais, latitud, longitud];

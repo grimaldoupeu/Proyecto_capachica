@@ -101,7 +101,7 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
         if (user.rol == UserRole.administrador) {
           Navigator.pushReplacementNamed(context, '/admin-dashboard');
         } else {
-          Navigator.pushReplacementNamed(context, '/home_screen');
+          Navigator.pushReplacementNamed(context, '/user-dashboard');
         }
       } catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -200,35 +200,14 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
               Positioned(
                 top: 20,
                 left: 20,
-                child: FadeTransition(
-                  opacity: _fadeAnimation,
-                  child: Material(
-                    color: Colors.transparent,
-                    child: InkWell(
-                      borderRadius: BorderRadius.circular(25),
-                      onTap: () {
-                        Navigator.pushReplacementNamed(context, '/home');
-                      },
-                      child: Container(
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.2),
-                          borderRadius: BorderRadius.circular(25),
-                          border: Border.all(
-                            color: Colors.white.withOpacity(0.3),
-                            width: 1,
-                          ),
-                        ),
-                        child: const Icon(
-                          Icons.home_outlined,
-                          color: Colors.white,
-                          size: 24,
-                        ),
-                      ),
-                    ),
-                  ),
+                child: IconButton(
+                  icon: const Icon(Icons.arrow_back_ios_new, color: Colors.white),
+                  onPressed: () {
+                    Navigator.of(context).pushNamedAndRemoveUntil('/home', (route) => false);
+                  },
                 ),
               ),
+
               // Contenido principal
               FadeTransition(
                 opacity: _fadeAnimation,
@@ -318,14 +297,16 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
 
   Widget _buildLoginCard() {
     return Container(
-      padding: const EdgeInsets.all(28),
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.15),
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(
-          color: Colors.white.withOpacity(0.2),
-          width: 1,
-        ),
+      width: MediaQuery.of(context).size.width * 0.95, // agranda el ancho
+        constraints: const BoxConstraints(maxWidth: 450), // máximo ancho en pantallas grandes
+        padding: const EdgeInsets.all(32), // más espacio interno
+        decoration: BoxDecoration(
+          color: Colors.white.withOpacity(0.15),
+          borderRadius: BorderRadius.circular(24),
+          border: Border.all(
+            color: Colors.white.withOpacity(0.2),
+            width: 1,
+          ),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.1),
@@ -444,49 +425,56 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
 
   Widget _buildAdditionalOptions() {
     return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Row(
-          children: [
-            Transform.scale(
-              scale: 1.2,
-              child: Checkbox(
-                value: _rememberMe,
-                onChanged: (value) {
-                  setState(() {
-                    _rememberMe = value ?? false;
-                  });
-                },
-                activeColor: Colors.white,
-                checkColor: const Color(0xFF667eea),
-                side: BorderSide(color: Colors.white.withOpacity(0.8)),
+        Expanded(
+          child: Row(
+            children: [
+              Transform.scale(
+                scale: 1.2,
+                child: Checkbox(
+                  value: _rememberMe,
+                  onChanged: (value) {
+                    setState(() {
+                      _rememberMe = value ?? false;
+                    });
+                  },
+                  activeColor: Colors.white,
+                  checkColor: const Color(0xFF667eea),
+                  side: BorderSide(color: Colors.white.withOpacity(0.8)),
+                ),
               ),
-            ),
-            Text(
-              'Recordarme',
+              Flexible(
+                child: Text(
+                  'Recordarme',
+                  style: TextStyle(
+                    color: Colors.white.withOpacity(0.9),
+                    fontSize: 10,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        Flexible(
+          child: TextButton(
+            onPressed: () {
+
+            },
+            child: Text(
+              '¿Olvidaste tu contraseña?',
+              overflow: TextOverflow.ellipsis,
               style: TextStyle(
                 color: Colors.white.withOpacity(0.9),
-                fontSize: 14,
+                fontSize: 12,
+                decoration: TextDecoration.underline,
               ),
-            ),
-          ],
-        ),
-        TextButton(
-          onPressed: () {
-            // Aquí puedes agregar la funcionalidad de recuperar contraseña
-          },
-          child: Text(
-            '¿Olvidaste tu contraseña?',
-            style: TextStyle(
-              color: Colors.white.withOpacity(0.9),
-              fontSize: 14,
-              decoration: TextDecoration.underline,
             ),
           ),
         ),
       ],
     );
   }
+
 
   Widget _buildLoginButton() {
     return SizedBox(

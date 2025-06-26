@@ -34,6 +34,26 @@ class PeriodoDisponibilidad extends Equatable {
     required this.fechaFin,
     required this.estaDisponible,
   });
+  factory PeriodoDisponibilidad.fromJson(Map<String, dynamic> json) {
+    return PeriodoDisponibilidad(
+      id: json['id'],
+      alojamientoId: json['alojamientoId'],
+      fechaInicio: DateTime.parse(json['fechaInicio']),
+      fechaFin: DateTime.parse(json['fechaFin']),
+      estaDisponible: json['estaDisponible'],
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'alojamientoId': alojamientoId,
+      'fechaInicio': fechaInicio.toIso8601String(),
+      'fechaFin': fechaFin.toIso8601String(),
+      'estaDisponible': estaDisponible,
+    };
+  }
+
 
   @override
   List<Object?> get props => [id, alojamientoId, fechaInicio, fechaFin, estaDisponible];

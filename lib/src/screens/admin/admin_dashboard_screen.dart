@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
+import 'create_alojamiento_screen.dart';
 
 class AdminDashboardScreen extends StatelessWidget {
   const AdminDashboardScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    // Placeholder data (replace with service call)
     final alojamientoCount = 5;
     final servicioCount = 10;
     final totalReservas = 25;
@@ -30,139 +30,151 @@ class AdminDashboardScreen extends StatelessWidget {
             icon: const Icon(Icons.notifications_outlined),
             onPressed: () {},
           ),
-          IconButton(
+          PopupMenuButton<String>(
             icon: const Icon(Icons.account_circle_outlined),
-            onPressed: () {},
+            onSelected: (value) {
+              if (value == 'logout') {
+                Navigator.pushReplacementNamed(context, '/login');
+              }
+            },
+            itemBuilder: (BuildContext context) => [
+              const PopupMenuItem<String>(
+                value: 'logout',
+                child: Text('Cerrar sesión'),
+              ),
+            ],
           ),
         ],
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(24),
-              decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  colors: [Color(0xFF667eea), Color(0xFF764ba2)],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-                borderRadius: BorderRadius.circular(16),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.grey.withOpacity(0.3),
-                    spreadRadius: 2,
-                    blurRadius: 8,
-                    offset: const Offset(0, 4),
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(16.0), // Reducido de 20 a 16 para ahorrar espacio
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    colors: [Color(0xFF667eea), Color(0xFF764ba2)],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
                   ),
-                ],
+                  borderRadius: BorderRadius.circular(16),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.grey.withOpacity(0.3),
+                      spreadRadius: 2,
+                      blurRadius: 8,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      '¡Bienvenido de vuelta!',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 24, // Reducido de 28 para ahorrar espacio
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 4), // Reducido de 8
+                    Text(
+                      'Gestiona tu negocio desde aquí',
+                      style: TextStyle(
+                        color: Colors.white.withOpacity(0.9),
+                        fontSize: 14, // Reducido de 16
+                      ),
+                    ),
+                  ],
+                ),
               ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+              const SizedBox(height: 16), // Reducido de 24
+              GridView.count(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                crossAxisCount: 2,
+                crossAxisSpacing: 12, // Reducido de 16
+                mainAxisSpacing: 12, // Reducido de 16
+                childAspectRatio: 1.2,
                 children: [
-                  const Text(
-                    '¡Bienvenido de vuelta!',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 28,
-                      fontWeight: FontWeight.bold,
+                  _buildStatCard('Alojamientos', alojamientoCount.toString(), Icons.hotel_rounded, const Color(0xFF4CAF50), '+2 este mes'),
+                  _buildStatCard('Servicios', servicioCount.toString(), Icons.room_service_rounded, const Color(0xFF2196F3), '+5 nuevos'),
+                  _buildStatCard('Reservas', totalReservas.toString(), Icons.calendar_today_rounded, const Color(0xFFFF9800), '+8 esta semana'),
+                  _buildStatCard('Ingresos', 'S/.${ingresosMensuales.toStringAsFixed(0)}', Icons.attach_money_rounded, const Color(0xFF9C27B0), 'Este mes'),
+                ],
+              ),
+              const SizedBox(height: 24),
+              const Text(
+                'Acciones Rápidas',
+                style: TextStyle(
+                  fontSize: 20, // Reducido de 22
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black87,
+                ),
+              ),
+              const SizedBox(height: 12), // Reducido de 16
+              Row(
+                children: [
+                  Expanded(
+                    child: _buildActionButton('Nuevo Alojamiento', Icons.add_home_rounded, const Color(0xFF4CAF50), () => _showCreateAlojamientoDialog(context)),
+                  ),
+                  const SizedBox(width: 10), // Reducido de 12
+                  Expanded(
+                    child: _buildActionButton('Nuevo Servicio', Icons.add_circle_rounded, const Color(0xFF2196F3), () => _showCreateServicioDialog(context)),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 20), // Reducido de 24
+              const Text(
+                'Gestión',
+                style: TextStyle(
+                  fontSize: 20, // Reducido de 22
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black87,
+                ),
+              ),
+              const SizedBox(height: 12), // Reducido de 16
+              _buildManagementCard('Gestionar Alojamientos', 'Administra, edita y organiza todos tus alojamientos', Icons.hotel_rounded, const Color(0xFF4CAF50), () => Navigator.pushNamed(context, '/admin/manage-alojamientos')),
+              const SizedBox(height: 10), // Reducido de 12
+              _buildManagementCard('Gestionar Servicios', 'Controla todos los servicios disponibles', Icons.room_service_rounded, const Color(0xFF2196F3), () => Navigator.pushNamed(context, '/admin/manage-servicios')),
+              const SizedBox(height: 24),
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      onPressed: () => Navigator.pushNamed(context, '/alojamientos/list'),
+                      icon: const Icon(Icons.list_rounded),
+                      label: const Text('Ver Lista Completa'),
+                      style: OutlinedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 14), // Reducido de 16
+                        side: const BorderSide(color: Color(0xFF667eea)),
+                        foregroundColor: const Color(0xFF667eea),
+                      ),
                     ),
                   ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Gestiona tu negocio desde aquí',
-                    style: TextStyle(
-                      color: Colors.white.withOpacity(0.9),
-                      fontSize: 16,
+                  const SizedBox(width: 10), // Reducido de 12
+                  Expanded(
+                    child: ElevatedButton.icon(
+                      onPressed: () => Navigator.pushNamed(context, '/home'),
+                      icon: const Icon(Icons.home_rounded),
+                      label: const Text('Inicio'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF667eea),
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 14), // Reducido de 16
+                        elevation: 0,
+                      ),
                     ),
                   ),
                 ],
               ),
-            ),
-            const SizedBox(height: 24),
-            GridView.count(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              crossAxisCount: 2,
-              crossAxisSpacing: 16,
-              mainAxisSpacing: 16,
-              childAspectRatio: 1.2,
-              children: [
-                _buildStatCard('Alojamientos', alojamientoCount.toString(), Icons.hotel_rounded, const Color(0xFF4CAF50), '+2 este mes'),
-                _buildStatCard('Servicios', servicioCount.toString(), Icons.room_service_rounded, const Color(0xFF2196F3), '+5 nuevos'),
-                _buildStatCard('Reservas', totalReservas.toString(), Icons.calendar_today_rounded, const Color(0xFFFF9800), '+8 esta semana'),
-                _buildStatCard('Ingresos', 'S/.${ingresosMensuales.toStringAsFixed(0)}', Icons.attach_money_rounded, const Color(0xFF9C27B0), 'Este mes'),
-              ],
-            ),
-            const SizedBox(height: 32),
-            const Text(
-              'Acciones Rápidas',
-              style: TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.bold,
-                color: Colors.black87,
-              ),
-            ),
-            const SizedBox(height: 16),
-            Row(
-              children: [
-                Expanded(
-                  child: _buildActionButton('Nuevo Alojamiento', Icons.add_home_rounded, const Color(0xFF4CAF50), () => _showCreateAlojamientoDialog(context)),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: _buildActionButton('Nuevo Servicio', Icons.add_circle_rounded, const Color(0xFF2196F3), () => _showCreateServicioDialog(context)),
-                ),
-              ],
-            ),
-            const SizedBox(height: 24),
-            const Text(
-              'Gestión',
-              style: TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.bold,
-                color: Colors.black87,
-              ),
-            ),
-            const SizedBox(height: 16),
-            _buildManagementCard('Gestionar Alojamientos', 'Administra, edita y organiza todos tus alojamientos', Icons.hotel_rounded, const Color(0xFF4CAF50), () => Navigator.pushNamed(context, '/admin/manage-alojamientos')),
-            const SizedBox(height: 12),
-            _buildManagementCard('Gestionar Servicios', 'Controla todos los servicios disponibles', Icons.room_service_rounded, const Color(0xFF2196F3), () => Navigator.pushNamed(context, '/admin/manage-servicios')),
-            const SizedBox(height: 32),
-            Row(
-              children: [
-                Expanded(
-                  child: OutlinedButton.icon(
-                    onPressed: () => Navigator.pushNamed(context, '/alojamientos/list'),
-                    icon: const Icon(Icons.list_rounded),
-                    label: const Text('Ver Lista Completa'),
-                    style: OutlinedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      side: const BorderSide(color: Color(0xFF667eea)),
-                      foregroundColor: const Color(0xFF667eea),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: ElevatedButton.icon(
-                    onPressed: () => Navigator.pushNamed(context, '/home'),
-                    icon: const Icon(Icons.home_rounded),
-                    label: const Text('Inicio'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF667eea),
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      elevation: 0,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -170,10 +182,10 @@ class AdminDashboardScreen extends StatelessWidget {
 
   Widget _buildStatCard(String title, String value, IconData icon, Color color, String subtitle) {
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(16), // Reducido de 20
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(12), // Reducido de 16
         boxShadow: [
           BoxShadow(
             color: Colors.grey.withOpacity(0.1),
@@ -191,12 +203,12 @@ class AdminDashboardScreen extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Container(
-                padding: const EdgeInsets.all(8),
+                padding: const EdgeInsets.all(6), // Reducido de 8
                 decoration: BoxDecoration(
                   color: color.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: BorderRadius.circular(6), // Reducido de 8
                 ),
-                child: Icon(icon, color: color, size: 24),
+                child: Icon(icon, color: color, size: 20), // Reducido de 24
               ),
             ],
           ),
@@ -206,7 +218,7 @@ class AdminDashboardScreen extends StatelessWidget {
               Text(
                 value,
                 style: const TextStyle(
-                  fontSize: 24,
+                  fontSize: 20, // Reducido de 24
                   fontWeight: FontWeight.bold,
                   color: Colors.black87,
                 ),
@@ -215,7 +227,7 @@ class AdminDashboardScreen extends StatelessWidget {
               Text(
                 title,
                 style: TextStyle(
-                  fontSize: 14,
+                  fontSize: 12, // Reducido de 14
                   color: Colors.grey[600],
                   fontWeight: FontWeight.w500,
                 ),
@@ -224,7 +236,7 @@ class AdminDashboardScreen extends StatelessWidget {
               Text(
                 subtitle,
                 style: TextStyle(
-                  fontSize: 12,
+                  fontSize: 10, // Reducido de 12
                   color: color,
                   fontWeight: FontWeight.w500,
                 ),
@@ -239,14 +251,14 @@ class AdminDashboardScreen extends StatelessWidget {
   Widget _buildActionButton(String title, IconData icon, Color color, VoidCallback onPressed) {
     return ElevatedButton.icon(
       onPressed: onPressed,
-      icon: Icon(icon, size: 20),
+      icon: Icon(icon, size: 18), // Reducido de 20
       label: Text(title),
       style: ElevatedButton.styleFrom(
         backgroundColor: color,
         foregroundColor: Colors.white,
-        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
+        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 10), // Reducido de 16 y 12
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(10), // Reducido de 12
         ),
         elevation: 2,
       ),
@@ -256,23 +268,23 @@ class AdminDashboardScreen extends StatelessWidget {
   Widget _buildManagementCard(String title, String subtitle, IconData icon, Color color, VoidCallback onTap) {
     return Card(
       elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)), // Reducido de 12
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(10), // Reducido de 12
         child: Padding(
-          padding: const EdgeInsets.all(20),
+          padding: const EdgeInsets.all(16), // Reducido de 20
           child: Row(
             children: [
               Container(
-                padding: const EdgeInsets.all(12),
+                padding: const EdgeInsets.all(10), // Reducido de 12
                 decoration: BoxDecoration(
                   color: color.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(10), // Reducido de 12
                 ),
-                child: Icon(icon, color: color, size: 28),
+                child: Icon(icon, color: color, size: 24), // Reducido de 28
               ),
-              const SizedBox(width: 16),
+              const SizedBox(width: 12), // Reducido de 16
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -280,27 +292,31 @@ class AdminDashboardScreen extends StatelessWidget {
                     Text(
                       title,
                       style: const TextStyle(
-                        fontSize: 18,
+                        fontSize: 16, // Reducido de 18
                         fontWeight: FontWeight.bold,
                         color: Colors.black87,
                       ),
+                      overflow: TextOverflow.ellipsis,
                     ),
                     const SizedBox(height: 4),
                     Text(
                       subtitle,
                       style: TextStyle(
-                        fontSize: 14,
+                        fontSize: 12, // Reducido de 14
                         color: Colors.grey[600],
                       ),
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ],
                 ),
               ),
+              const SizedBox(width: 8),
               Icon(
                 Icons.arrow_forward_ios_rounded,
                 color: Colors.grey[400],
-                size: 16,
+                size: 14, // Reducido de 16
               ),
+              const SizedBox(width: 4),
             ],
           ),
         ),
@@ -313,7 +329,7 @@ class AdminDashboardScreen extends StatelessWidget {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)), // Reducido de 16
           title: Row(
             children: [
               Icon(Icons.add_home_rounded, color: Colors.green[600]),
@@ -321,7 +337,6 @@ class AdminDashboardScreen extends StatelessWidget {
               const Text('Crear Nuevo Alojamiento'),
             ],
           ),
-          content: const Text('Esta funcionalidad estará disponible pronto.\n¿Te gustaría ir a la gestión de alojamientos?'),
           actions: [
             TextButton(
               child: const Text('Cancelar'),
@@ -329,14 +344,12 @@ class AdminDashboardScreen extends StatelessWidget {
             ),
             ElevatedButton(
               onPressed: () {
-                Navigator.of(context).pop();
-                Navigator.pushNamed(context, '/admin/manage-alojamientos');
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const CreateAlojamientoScreen()),
+                );
               },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.green[600],
-                foregroundColor: Colors.white,
-              ),
-              child: const Text('Ir a Gestión'),
+              child: const Text('Registrar nuevo alojamiento'),
             ),
           ],
         );
@@ -349,7 +362,7 @@ class AdminDashboardScreen extends StatelessWidget {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)), // Reducido de 16
           title: Row(
             children: [
               Icon(Icons.add_circle_rounded, color: Colors.blue[600]),
@@ -364,10 +377,7 @@ class AdminDashboardScreen extends StatelessWidget {
               onPressed: () => Navigator.of(context).pop(),
             ),
             ElevatedButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-                Navigator.pushNamed(context, '/admin/manage-servicios');
-              },
+              onPressed: () => Navigator.pushNamed(context, '/admin/create-servicio'),
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.blue[600],
                 foregroundColor: Colors.white,
