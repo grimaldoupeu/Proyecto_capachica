@@ -1,9 +1,55 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_map/flutter_map.dart';
+import 'package:latlong2/latlong.dart';
+import 'package:location/location.dart'; // Necesitas agregar esta importación
 
-class AlojamientoDetailScreen extends StatelessWidget {
+class AlojamientoDetailScreen extends StatefulWidget {
   final String alojamientoId;
 
   const AlojamientoDetailScreen({super.key, required this.alojamientoId});
+
+  @override
+  State<AlojamientoDetailScreen> createState() => _AlojamientoDetailScreenState();
+}
+
+class _AlojamientoDetailScreenState extends State<AlojamientoDetailScreen> {
+  late MapController _mapController;
+  int _currentImageIndex = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _mapController = MapController();
+  }
+
+  // Función para obtener la ubicación del usuario
+  Future<LatLng?> _getUserLocation() async {
+    final location = Location();
+    bool serviceEnabled;
+    PermissionStatus permissionGranted;
+
+    // Verifica si el servicio de ubicación está habilitado
+    serviceEnabled = await location.serviceEnabled();
+    if (!serviceEnabled) {
+      serviceEnabled = await location.requestService();
+      if (!serviceEnabled) {
+        return null;
+      }
+    }
+
+    // Verifica permisos
+    permissionGranted = await location.hasPermission();
+    if (permissionGranted == PermissionStatus.denied) {
+      permissionGranted = await location.requestPermission();
+      if (permissionGranted != PermissionStatus.granted) {
+        return null;
+      }
+    }
+
+    // Obtiene la ubicación actual
+    final userLocation = await location.getLocation();
+    return LatLng(userLocation.latitude!, userLocation.longitude!);
+  }
 
   // Función para obtener datos del alojamiento basado en el ID
   Map<String, dynamic> _getAlojamientoData(String id) {
@@ -54,7 +100,7 @@ class AlojamientoDetailScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final alojamientoData = _getAlojamientoData(alojamientoId);
+    final alojamientoData = _getAlojamientoData(widget.alojamientoId);
     final textTheme = Theme.of(context).textTheme;
 
     return Scaffold(
@@ -77,18 +123,74 @@ class AlojamientoDetailScreen extends StatelessWidget {
                   ],
                 ),
               ),
-              background: PageView.builder(
-                itemCount: (alojamientoData['fotos'] as List).length,
-                itemBuilder: (context, index) {
-                  return Image.network(
-                    (alojamientoData['fotos'] as List)[index]['urlFoto'] as String,
-                    fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) => Container(
-                      color: Colors.grey[300],
-                      child: const Icon(Icons.broken_image, size: 100),
+              background: Stack(
+                children: [
+                  PageView.builder(
+                    itemCount: (alojamientoData['fotos'] as List).length,
+                    onPageChanged: (index) {
+                      setState(() {
+                        _currentImageIndex = index;
+                      });
+                    },
+                    itemBuilder: (context, index) {
+                      return Image.network(
+                        (alojamientoData['fotos'] as List)[index]['urlFoto'] as String,
+                        fit: BoxFit.cover,
+                        loadingBuilder: (context, child, loadingProgress) {
+                          if (loadingProgress == null) return child;
+                          return Container(
+                            color: Colors.grey[200],
+                            child: Center(
+                              child: CircularProgressIndicator(
+                                value: loadingProgress.expectedTotalBytes != null
+                                    ? loadingProgress.cumulativeBytesLoaded /
+                                      loadingProgress.expectedTotalBytes!
+                                    : null,
+                              ),
+                            ),
+                          );
+                        },
+                        errorBuilder: (context, error, stackTrace) {
+                          debugPrint('Error loading image: $error');
+                          return Container(
+                            color: Colors.grey[300],
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                const Icon(Icons.broken_image, size: 64, color: Colors.grey),
+                                const SizedBox(height: 8),
+                                Text(
+                                  'Error al cargar imagen',
+                                  style: TextStyle(color: Colors.grey[600]),
+                                ),
+                              ],
+                            ),
+                          );
+                        },
+                      );
+                    },
+                  ),
+                  // Indicador de páginas
+                  Positioned(
+                    bottom: 16,
+                    right: 16,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: Colors.black54,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Text(
+                        '${_currentImageIndex + 1} / ${(alojamientoData['fotos'] as List).length}',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
                     ),
-                  );
-                },
+                  ),
+                ],
               ),
             ),
             actions: [
@@ -201,23 +303,63 @@ class AlojamientoDetailScreen extends StatelessWidget {
                       style: textTheme.bodyMedium,
                     ),
                     const SizedBox(height: 8),
-                    Container(
-                      height: 200,
-                      decoration: BoxDecoration(
-                        color: Colors.grey[300],
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: const Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(Icons.map, size: 48, color: Colors.grey),
-                            Text('Mapa de ubicación'),
-                            Text('(Próximamente)', style: TextStyle(fontSize: 12)),
-                          ],
-                        ),
-                      ),
+                  Container(
+                    height: 200,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(8),
                     ),
+                    clipBehavior: Clip.antiAlias,
+                    child: FutureBuilder<LatLng?>(
+                      future: _getUserLocation(),
+                      builder: (context, snapshot) {
+                        final LatLng alojamientoLatLng = LatLng(
+                          (alojamientoData['direccion'] as Map)['latitud'] as double,
+                          (alojamientoData['direccion'] as Map)['longitud'] as double,
+                        );
+
+                        final LatLng? userLatLng = snapshot.data;
+
+                        return Container(
+                          height: 200,
+                          clipBehavior: Clip.antiAlias,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: FlutterMap(
+                            options: MapOptions(
+                              initialCenter: alojamientoLatLng,
+                              initialZoom: 14,
+                            ),
+                            children: [
+                              TileLayer(
+                                urlTemplate:
+                                    'https://api.mapbox.com/styles/v1/mapbox/streets-v11/tiles/{z}/{x}/{y}@2x?access_token=pk.eyJ1IjoiZ3JpbWFsZG9hcnJlZG9uZG8iLCJhIjoiY21hYmJvMGpoMmF6YjJrb29tNnJ0MXQ1dyJ9.Em9vVlsuF3-ddqRnxTMYAw',
+                                userAgentPackageName: 'com.example.turismo_capachica',
+                              ),
+                              MarkerLayer(
+                                markers: [
+                                  Marker(
+                                    point: alojamientoLatLng,
+                                    width: 40,
+                                    height: 40,
+                                    child: const Icon(Icons.location_on, color: Colors.red, size: 40),
+                                  ),
+                                  if (userLatLng != null)
+                                    Marker(
+                                      point: userLatLng,
+                                      width: 40,
+                                      height: 40,
+                                      child: const Icon(Icons.person_pin_circle, color: Colors.blue, size: 40),
+                                    ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+
                     const Divider(height: 32),
 
                     // Disponibilidad

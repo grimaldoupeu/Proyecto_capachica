@@ -15,6 +15,7 @@ import 'package:turismo_capachica/src/screens/home/home_screen.dart';
 import 'package:turismo_capachica/src/screens/reservas/create_reserva_screen.dart';
 import 'package:turismo_capachica/src/screens/reservas/user_reservas_screen.dart';
 import 'package:turismo_capachica/src/screens/usuario/user_dashboard_screen.dart';
+import 'package:turismo_capachica/src/screens/mapa/mapa_screen.dart'; // ✅ Importación agregada
 import 'package:turismo_capachica/src/services/reserva_service/reserva_service.dart';
 
 void main() {
@@ -62,6 +63,7 @@ class MyApp extends StatelessWidget {
           '/user-dashboard': (context) => const UserDashboardScreen(),
           '/manage-alojamientos': (context) => const ManageAlojamientosScreen(),
           '/manage-servicios': (context) => const ManageServiciosScreen(),
+          '/mapa': (context) => const MapaScreen(),
         },
       ),
     );
